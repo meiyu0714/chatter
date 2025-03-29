@@ -24,13 +24,57 @@ The diagram below shows the flow of RAG. This repo only implements the online pa
 
 It uses numpy to build the in-memory "vector database" for RAG.
 
+
+
 ## Getting Started
 
 ### First time
 
 Update `SUPABASE_PROJECT_URL` and `SUPABASE_ANON_KEY` in [supabase.tsx](app/supabase.tsx) if necessary.
 
+#### 🛠️ Supabase Setup Instructions
+
+To enable real-time messaging and storage, make sure to create the required `messages` table in your Supabase database **before running the app**.
+
+##### ✅ Option 1: Use Supabase Dashboard (Recommended)
+
+1. Go to your Supabase project → Navigate to **"Database" → "Table Editor"** on the left sidebar.
+2. In the right panel, select the `public` schema and click **"Create a new table"**.
+3. Fill out the following:
+
+   - **Table name**: `messages`
+   - **Columns**:
+     - `id`: `uuid` (Primary Key, Default: `gen_random_uuid()`)
+     - `text`: `text`
+     - `source`: `text`
+     - `references`: `jsonb`
+     - `created_at`: `timestamp with time zone` (Default: `now()`)
+
+4. Save the table.
+
+##### Warning
+
+- ⚠️ Do **not** use the SQL Editor to create this table.  
+
+- PostgreSQL reserves the keyword `references`, which can lead to syntax errors when creating columns via raw SQL.
+- 🔒 Row Level Security (RLS)
+  Make sure **RLS is disabled** for the `messages` table. If enabled, you must manually add `INSERT` and `SELECT` policies.
+  For beginner use and local testing, it's recommended to disable RLS.
+- 🔄 Enable Realtime Updates
+  - Go to the **"Database" → "Replication"** tab in Supabase. Enable Realtime for the `messages` table.
+
+With these settings in place, the app will be able to store, retrieve, and display chat messages in real time.
+
 Also, create `.env` file. See [.env.example](/.env.example) for an example.
+
+#### 🧩 Install Dependencies Backend 
+
+Make sure you have [Pipenv](https://pipenv.pypa.io/en/latest/) installed.
+
+````bash
+pipenv install
+npm install
+````
 
 ### Dev
 
