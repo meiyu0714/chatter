@@ -11,9 +11,9 @@ import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Link2Icon } from "@radix-ui/react-icons";
 
 type Message = {
-  id: String;
-  text: String;
-  source: String;
+  id: string;
+  text: string;
+  source: string;
   references?: ReferenceData[];
 };
 
@@ -143,7 +143,9 @@ export default function RealtimeChat({
       .finally(() => setIsSending(false));
   };
   // The ref element used for the scroll-to-end effect.
-  const olEndRef = useRef(null);
+  // cannot use const olEndRef = useRef(null); 
+  const olEndRef = useRef<HTMLDivElement | null>(null);
+
 
   // Clear all messages to reset the session.
   const clearAllMessages = () => {
@@ -177,7 +179,8 @@ export default function RealtimeChat({
           table: "messages",
         },
         (payload) => {
-          setMessages([...messages, payload.new as Message]);
+          // setMessages([...messages, payload.new as Message]);
+          setMessages((prev) => [...prev, payload.new as Message]);
         }
       )
       .subscribe();

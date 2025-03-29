@@ -1,25 +1,38 @@
 from data_model import ChatInput, RAGResponse, ReferenceData
 import pandas as pd
 import numpy as np
-import openai
+from openai import OpenAI # 旧版 import openai
 from dotenv import load_dotenv
 from functools import cache
+import os
 
 
 # Load the OpenAI API key.
 load_dotenv(override=True)
 
 
-EMBED_MODEL_ID = 'text-embedding-ada-002'
-CHAT_MODEL_ID = 'gpt-3.5-turbo'
+EMBED_MODEL_ID = 'text-embedding-3-small'  # # A more powerful and cost-effective embedding model (compared to Ada).
+CHAT_MODEL_ID = 'gpt-4o'  # Or 'gpt-4-turbo'，if you have access
+
 INITIAL_MESSAGES = [
-    {"role": "system", "content": "You are George, the salesperson of Bruvi, a coffee brewing brand. You will help the customer find the product to purchase. You will be kind, enthusiastic and patient. Every time the user asks a question, you will be given some context. Only answer the question based on the context. If the information is not in the context, just say you don't know."}
+    {
+        "role": "system",
+        "content": (
+            "You are George, the salesperson for Bruvi, a coffee brewing brand. "
+            "Help customers find the right product to purchase. "
+            "Be kind, enthusiastic, and patient. Whenever the user asks a question, "
+            "you will be given some context. Only answer based on that context. "
+            "If the information is not in the context, simply respond that you don't know."
+        ),
+    }
 ]
-
-@cache
+    
+@cache 
+# If you're using multiple OpenAI keys or model configurations, consider @lru_cache 
+# with a function signature like: def get_openai_client(api_key: str):
 def get_openai_client():
-    return openai.OpenAI()
-
+    # return openai.OpenAI() 
+    return OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 @cache
 def get_site_data():
@@ -54,7 +67,7 @@ A: """
 def get_relevant_pages(query: str, site_data: pd.DataFrame, n: int=3):
   client = get_openai_client()
   embeddings = np.array(site_data.embedding.to_list())
-  print(client.api_key)
+  # print(client.api_key)
   query_response = client.embeddings.create(
       model=EMBED_MODEL_ID,
       input=query,
@@ -69,7 +82,10 @@ def get_relevant_pages(query: str, site_data: pd.DataFrame, n: int=3):
   top_n_indices = ranked_indices[:n]
   top_n_scores = cos_similarities[top_n_indices]
   top_n_site_data = site_data.loc[top_n_indices]
+  # top_n_site_data['query_similarity_score'] = top_n_scores
+  top_n_site_data = site_data.loc[top_n_indices].copy()
   top_n_site_data['query_similarity_score'] = top_n_scores
+
   return top_n_site_data
 
 

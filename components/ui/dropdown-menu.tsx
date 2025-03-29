@@ -9,6 +9,7 @@ import {
 } from "@radix-ui/react-icons"
 
 import { cn } from "@/lib/utils"
+console.log(cn("hello", "world")); 
 
 const DropdownMenu = DropdownMenuPrimitive.Root
 

@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-import openai
+from openai import OpenAI
 
 class Message(BaseModel):
     text: str
